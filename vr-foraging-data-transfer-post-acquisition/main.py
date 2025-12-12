@@ -3,6 +3,7 @@ import dataclasses
 import re
 from aind_behavior_vr_foraging.cli import DataMapperCli
 from aind_behavior_vr_foraging.data_contract import dataset
+from aind_behavior_vr_foraging import __semver__
 from datetime import datetime
 import logging
 from datetime import timezone
@@ -14,6 +15,7 @@ from pathlib import PurePosixPath
 from aind_data_schema.core import acquisition
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 target_folder = r"\\allen\aind\stage\vr-foraging\quarantined"
 FORCE_METADATA_REGEN = False
@@ -101,6 +103,19 @@ def main():
                     f"Failed to load EndSession log for {session_info.session_id}: {e}"
                 )
                 end_of_session_time = None
+            version = (
+                this_dataset["Behavior"]["InputSchemas"]["TaskLogic"]
+                .load()
+                .data.version
+            )
+            repo_version = __semver__
+
+            if version != repo_version:
+                raise ValueError(
+                    "Version mismatch for session %s: dataset version %s != submodule repository version %s. Consider updating the submodule to match the dataset version."
+                    % (session_info.session_id, version, repo_version)
+                )
+
             DataMapperCli(
                 data_path=session_info.session_directory,
                 repo_path=Path("./Aind.Behavior.VrForaging"),
