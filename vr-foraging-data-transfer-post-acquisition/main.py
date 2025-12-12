@@ -8,7 +8,7 @@ from datetime import datetime
 import logging
 from datetime import timezone
 from clabe.data_transfer import aind_watchdog
-
+import requests
 
 import aind_data_transfer_service.models.core
 from pathlib import PurePosixPath
@@ -22,7 +22,8 @@ FORCE_METADATA_REGEN = False
 
 PROJECT_NAME = "Cognitive flexibility in patch foraging"
 JOB_TYPE = "vr_foraging"
-TRANSFER_ENDPOINT = "http://aind-data-transfer-service-dev/api/v2/submit_jobs"
+TRANSFER_ENDPOINT = "http://aind-data-transfer-service/api/v2/submit_jobs"
+TRANSFER_ENDPOINT = "http://aind-data-transfer-service/api/v2/validate_json"
 
 
 @dataclasses.dataclass
@@ -179,10 +180,12 @@ def main():
             f"Submit request: {submit_request_v2.model_dump(mode='json', exclude_none=True)}"
         )
 
-        # submit_job_response = requests.post(
-        #    url=TRANSFER_ENDPOINT,
-        #    json=submit_request_v2.model_dump(mode="json", exclude_none=True),
-        # )
+        submit_job_response = requests.post(
+            url=TRANSFER_ENDPOINT,
+            json=submit_request_v2.model_dump(mode="json", exclude_none=True),
+        )
+        submit_job_response.raise_for_status()
+        logger.info(submit_job_response.json())
 
 
 if __name__ == "__main__":
