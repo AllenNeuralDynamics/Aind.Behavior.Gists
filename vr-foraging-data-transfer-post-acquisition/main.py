@@ -6,11 +6,21 @@ from aind_behavior_vr_foraging.data_contract import dataset
 from datetime import datetime
 import logging
 from datetime import timezone
+from clabe.data_transfer import aind_watchdog
+
+
+import aind_data_transfer_service.models.core
+from pathlib import PurePosixPath
+from aind_data_schema.core import acquisition
 
 logger = logging.getLogger(__name__)
 
 target_folder = r"\\allen\aind\stage\vr-foraging\quarantined"
 FORCE_METADATA_REGEN = False
+
+PROJECT_NAME = "Cognitive flexibility in patch foraging"
+JOB_TYPE = "vr_foraging"
+TRANSFER_ENDPOINT = "http://aind-data-transfer-service-dev/api/v2/submit_jobs"
 
 
 @dataclasses.dataclass
@@ -96,6 +106,68 @@ def main():
                 repo_path=Path("./Aind.Behavior.VrForaging"),
                 session_end_time=end_of_session_time,
             ).cli_cmd()
+
+        available_modalities = (
+            aind_watchdog.WatchdogDataTransferService._find_modality_candidates(
+                session_info.session_directory
+            )
+        )
+        acquisition_json = acquisition.Acquisition.model_validate_json(
+            Path(session_info.session_directory, "acquisition.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        tasks = {}
+        tasks["modality_transformation_settings"] = {
+            modality: aind_data_transfer_service.models.core.Task(
+                job_settings={
+                    "input_source": str(
+                        PurePosixPath(session_info.session_directory / modality)
+                    )
+                }
+            )
+            for modality in available_modalities.keys()
+        }
+
+        tasks["gather_preliminary_metadata"] = (
+            aind_data_transfer_service.models.core.Task(
+                job_settings={
+                    "metadata_dir": str(PurePosixPath(session_info.session_directory))
+                }
+            )
+        )
+
+        upload_job_configs_v2 = aind_data_transfer_service.models.core.UploadJobConfigsV2(
+            job_type=JOB_TYPE,
+            project_name=PROJECT_NAME,
+            platform=aind_data_transfer_service.models.core.Platform.from_abbreviation(
+                "Behavior"
+            ),
+            modalities=[
+                aind_data_transfer_service.models.core.Modality.from_abbreviation(m)
+                for m in available_modalities.keys()
+            ],
+            subject_id=str(session_info.subject),
+            acq_datetime=acquisition_json.acquisition_start_time,
+            tasks=tasks,
+        )
+
+        submit_request_v2 = aind_data_transfer_service.models.core.SubmitJobRequestV2(
+            upload_jobs=[upload_job_configs_v2],
+            user_email=f"{acquisition_json.experimenters[0]}@alleninstitute.org",
+        )
+
+        logger.info(
+            f"Submitting data transfer job for session {session_info.session_id}..."
+        )
+        logger.debug(
+            f"Submit request: {submit_request_v2.model_dump(mode='json', exclude_none=True)}"
+        )
+
+        # submit_job_response = requests.post(
+        #    url=TRANSFER_ENDPOINT,
+        #    json=submit_request_v2.model_dump(mode="json", exclude_none=True),
+        # )
 
 
 if __name__ == "__main__":
