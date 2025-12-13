@@ -8,4 +8,5 @@ dependencies = [
     "aind-behavior-vr-foraging[launcher]>=0.6.0",
     "aind-data-access-api[docdb]>=1.9.2",
     "ruff",
+    "rich>=13.0.0",
 ]
