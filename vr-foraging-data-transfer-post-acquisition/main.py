@@ -4,6 +4,8 @@ import re
 from aind_behavior_vr_foraging.cli import DataMapperCli
 from aind_behavior_vr_foraging.data_contract import dataset
 from aind_behavior_vr_foraging import __semver__
+from aind_data_transfer_service.configs.platforms_v1 import Platform
+
 from datetime import datetime
 import logging
 from datetime import timezone
@@ -23,7 +25,6 @@ FORCE_METADATA_REGEN = False
 PROJECT_NAME = "Cognitive flexibility in patch foraging"
 JOB_TYPE = "vr_foraging"
 TRANSFER_ENDPOINT = "http://aind-data-transfer-service/api/v2/submit_jobs"
-TRANSFER_ENDPOINT = "http://aind-data-transfer-service/api/v2/validate_json"
 
 
 @dataclasses.dataclass
@@ -153,19 +154,19 @@ def main():
             )
         )
 
-        upload_job_configs_v2 = aind_data_transfer_service.models.core.UploadJobConfigsV2(
-            job_type=JOB_TYPE,
-            project_name=PROJECT_NAME,
-            platform=aind_data_transfer_service.models.core.Platform.from_abbreviation(
-                "Behavior"
-            ),
-            modalities=[
-                aind_data_transfer_service.models.core.Modality.from_abbreviation(m)
-                for m in available_modalities.keys()
-            ],
-            subject_id=str(session_info.subject),
-            acq_datetime=acquisition_json.acquisition_start_time,
-            tasks=tasks,
+        upload_job_configs_v2 = (
+            aind_data_transfer_service.models.core.UploadJobConfigsV2(
+                job_type=JOB_TYPE,
+                project_name=PROJECT_NAME,
+                platform=Platform.BEHAVIOR,
+                modalities=[
+                    aind_data_transfer_service.models.core.Modality.from_abbreviation(m)
+                    for m in available_modalities.keys()
+                ],
+                subject_id=str(session_info.subject),
+                acq_datetime=acquisition_json.acquisition_start_time,
+                tasks=tasks,
+            )
         )
 
         submit_request_v2 = aind_data_transfer_service.models.core.SubmitJobRequestV2(
