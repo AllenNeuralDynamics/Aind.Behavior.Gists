@@ -11,6 +11,7 @@ from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn
 from rich.prompt import Confirm
 from rich.table import Table
 from s3_utils import download_s3_asset, extract_s3_locations
+from datetime import datetime
 
 API_GATEWAY_HOST = "api.allenneuraldynamics.org"
 
@@ -23,7 +24,12 @@ def main() -> None:
         host=API_GATEWAY_HOST,
     )
 
-    query = {"subject.subject_id": {"$in": ["789917", "808619", "808728"]}}
+    query = {
+        "subject.subject_id": {"$in": ["789917", "808619", "808728"]},
+        "acquisition.acquisition_start_time": {
+            "$gt": str(datetime.fromisoformat("2023-10-01T00:00:00"))
+        },
+    }
     projection = {
         "name": 1,
         "created": 1,
