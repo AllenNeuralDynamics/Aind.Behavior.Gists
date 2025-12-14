@@ -1,0 +1,9 @@
+[project]
+name = "upgrade-aind-behavior-services-json"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aind-behavior-vr-foraging>=0.6.4",
+]
