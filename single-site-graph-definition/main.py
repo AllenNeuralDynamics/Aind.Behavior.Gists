@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import Any, Literal
 from aind_behavior_vr_foraging import task_logic
 from aind_behavior_services.task_logic import distributions
 import numpy as np
@@ -14,7 +14,7 @@ logging.disable(logging.CRITICAL)
 def make_patch(
     label: str,
     state_index: int,
-    odor_index: int,
+    odor_index: Literal[1, 2, 3],
     p_reward: float,
     reward_amount: float = 5.0,
     inter_patch_min_length: float = 30,
@@ -28,7 +28,7 @@ def make_patch(
         label=label,
         state_index=state_index,
         odor_specification=task_logic.OdorSpecification(
-            index=odor_index, concentration=1
+            index=odor_index,
         ),
         patch_terminators=[
             task_logic.PatchTerminatorOnChoice(count=task_logic.scalar_value(1)),
