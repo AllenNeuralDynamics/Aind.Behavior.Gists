@@ -1,0 +1,8 @@
+[project]
+name = "single-site-graph-definition"
+version = "0.1.0"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aind-behavior-vr-foraging>=0.6.4",
+]
