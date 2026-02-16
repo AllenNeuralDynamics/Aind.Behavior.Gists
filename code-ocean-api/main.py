@@ -1,6 +1,7 @@
 import json
 import time
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Any, Dict
 
 from codeocean import CodeOcean
@@ -21,9 +22,9 @@ parameters_to_vary = {
     "hidden_dim": [50, 100],
     "num_layers": [5, 10],
 }
-parameters_to_vary = {
-    "learning_rate": [0.123],
-}
+# parameters_to_vary = {
+#    "learning_rate": [0.123],
+# }
 
 jobs: Dict[str, Dict[str, Any]] = {}
 
@@ -40,6 +41,9 @@ for param, values in parameters_to_vary.items():
             capsule_id=capsule_id,
             named_parameters=[
                 NamedRunParam(param_name=param, value=str(value)),
+                NamedRunParam(
+                    param_name="base_output_dir", value=f"/results/{job_key}"
+                ),
             ],
         )
 
