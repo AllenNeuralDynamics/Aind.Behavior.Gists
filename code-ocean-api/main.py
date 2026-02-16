@@ -1,3 +1,4 @@
+import json
 import time
 from pathlib import Path
 from typing import Any, Dict
@@ -20,11 +21,12 @@ parameters_to_vary = {
     "hidden_dim": [50, 100],
     "num_layers": [5, 10],
 }
+parameters_to_vary = {
+    "learning_rate": [0.123],
+}
 
-# Dictionary to track all jobs: key = "parametername_parametervalue", value = job info
 jobs: Dict[str, Dict[str, Any]] = {}
 
-# Submit all jobs
 print("=" * 80)
 print("SUBMITTING JOBS")
 print("=" * 80)
@@ -45,12 +47,10 @@ for param, values in parameters_to_vary.items():
             response = co_client.computations.run_capsule(run_params=run_params)
             print(f"Started computation: {response}")
 
-            # Extract computation ID from response
             computation_id = (
                 response.get("id") if isinstance(response, dict) else response.id
             )
 
-            # Store job information
             jobs[job_key] = {
                 "computation_id": computation_id,
                 "parameter_name": param,
@@ -73,16 +73,31 @@ for param, values in parameters_to_vary.items():
 print(f"\nTotal jobs submitted: {len(jobs)}")
 print(f"Job keys: {list(jobs.keys())}")
 
-# Poll for status updates on all jobs
+jobs_file = Path("jobs.json")
+print(f"\nSaving job information to {jobs_file}...")
+
+jobs_to_save = {}
+for job_key, job_info in jobs.items():
+    job_data = job_info.copy()
+    if "response" in job_data and not isinstance(
+        job_data["response"], (dict, str, type(None))
+    ):
+        job_data["response"] = str(job_data["response"])
+    jobs_to_save[job_key] = job_data
+
+with open(jobs_file, "w") as f:
+    json.dump(jobs_to_save, f, indent=2)
+
+print(f"Job information saved to {jobs_file}")
+
 print("\n" + "=" * 80)
 print("MONITORING JOB STATUS")
 print("=" * 80)
 
 terminal_states = ["completed", "failed", "stopped"]
-poll_interval = 10  # seconds
+poll_interval = 10
 
 while True:
-    # Check if all jobs are in terminal states
     all_done = True
 
     print(f"\n[{time.strftime('%Y-%m-%d %H:%M:%S')}] Status update:")
@@ -91,7 +106,6 @@ while True:
     for job_key, job_info in jobs.items():
         computation_id = job_info.get("computation_id")
 
-        # Skip jobs that failed to submit
         if computation_id is None:
             print(f"  {job_key:30} -> {job_info['status']}")
             continue
@@ -104,15 +118,12 @@ while True:
                 else computation.state
             )
 
-            # Update job status
             old_status = job_info["status"]
             job_info["status"] = state
 
-            # Print status with change indicator
             status_change = "" if old_status == state else f" (was: {old_status})"
             print(f"  {job_key:30} -> {state}{status_change}")
 
-            # Check if this job is still running
             if state.lower() not in terminal_states:
                 all_done = False
 
@@ -121,7 +132,6 @@ while True:
             job_info["status"] = "error_checking_status"
             job_info["error"] = str(e)
 
-    # Break if all jobs are done
     if all_done:
         print("\n" + "=" * 80)
         print("ALL JOBS COMPLETED")
@@ -131,7 +141,6 @@ while True:
     print(f"\nWaiting {poll_interval} seconds before next check...")
     time.sleep(poll_interval)
 
-# Print final summary
 print("\nFINAL JOB SUMMARY")
 print("=" * 80)
 
