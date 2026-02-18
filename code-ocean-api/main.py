@@ -1,5 +1,6 @@
 import json
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any, Dict
@@ -16,63 +17,83 @@ capsule_id = "2a66df60-f96d-401e-8384-2e4aedeee818"
 respt = co_client.capsules.get_capsule(capsule_id)
 print(respt)
 
-parameters_to_vary = {
-    "learning_rate": [0.001, 0.0005],
-    "batch_size": [64, 128, 256],
-    "hidden_dim": [50, 100],
-    "num_layers": [5, 10],
-}
-# parameters_to_vary = {
-#    "learning_rate": [0.123],
-# }
+
+parameters_to_vary = [
+    {
+        "learning_rate": 5e-5,
+        "batch_size": 256,
+    },
+    {
+        "learning_rate": 1e-4,
+        "batch_size": 256,
+    },
+    {
+        "learning_rate": 5e-5,
+        "batch_size": 128,
+    },
+    {
+        "learning_rate": 1e-4,
+        "batch_size": 128,
+    },
+    {
+        "learning_rate": 5e-4,
+        "batch_size": 256,
+    },
+    {
+        "learning_rate": 5e-4,
+        "batch_size": 128,
+    },
+]
 
 jobs: Dict[str, Dict[str, Any]] = {}
+batch_submission_time = datetime.now(timezone.utc).isoformat()
 
 print("=" * 80)
 print("SUBMITTING JOBS")
 print("=" * 80)
 
-for param, values in parameters_to_vary.items():
-    for value in values:
-        job_key = f"{param}_{value}"
-        print(f"Running pipeline with {param}={value}")
+for run_idx, run_settings in enumerate(parameters_to_vary):
+    param_str = "_".join([f"{k}={v}" for k, v in run_settings.items()])
+    job_key = f"run_{run_idx}_{param_str}"
+    print(f"Running pipeline with settings: {run_settings}")
 
-        run_params = RunParams(
-            capsule_id=capsule_id,
-            named_parameters=[
-                NamedRunParam(param_name=param, value=str(value)),
-                NamedRunParam(
-                    param_name="base_output_dir", value=f"/results/{job_key}"
-                ),
-            ],
+    named_params = [
+        NamedRunParam(param_name=param_name, value=str(param_value))
+        for param_name, param_value in run_settings.items()
+    ]
+    named_params.append(
+        NamedRunParam(param_name="base_output_dir", value=f"/results/npe/{job_key}")
+    )
+
+    run_params = RunParams(
+        capsule_id=capsule_id,
+        named_parameters=named_params,
+    )
+
+    try:
+        response = co_client.computations.run_capsule(run_params=run_params)
+        print(f"Started computation: {response}")
+
+        computation_id = (
+            response.get("id") if isinstance(response, dict) else response.id
         )
 
-        try:
-            response = co_client.computations.run_capsule(run_params=run_params)
-            print(f"Started computation: {response}")
+        jobs[job_key] = {
+            "computation_id": computation_id,
+            "run_settings": run_settings,
+            "status": "submitted",
+            "response": response,
+        }
 
-            computation_id = (
-                response.get("id") if isinstance(response, dict) else response.id
-            )
-
-            jobs[job_key] = {
-                "computation_id": computation_id,
-                "parameter_name": param,
-                "parameter_value": value,
-                "status": "submitted",
-                "response": response,
-            }
-
-            print(f"  -> Job key: {job_key}, Computation ID: {computation_id}")
-        except Exception as e:
-            print(f"  -> ERROR submitting job {job_key}: {e}")
-            jobs[job_key] = {
-                "computation_id": None,
-                "parameter_name": param,
-                "parameter_value": value,
-                "status": "submission_failed",
-                "error": str(e),
-            }
+        print(f"  -> Job key: {job_key}, Computation ID: {computation_id}")
+    except Exception as e:
+        print(f"  -> ERROR submitting job {job_key}: {e}")
+        jobs[job_key] = {
+            "computation_id": None,
+            "run_settings": run_settings,
+            "status": "submission_failed",
+            "error": str(e),
+        }
 
 print(f"\nTotal jobs submitted: {len(jobs)}")
 print(f"Job keys: {list(jobs.keys())}")
@@ -89,8 +110,10 @@ for job_key, job_info in jobs.items():
         job_data["response"] = str(job_data["response"])
     jobs_to_save[job_key] = job_data
 
+batch_data = {"batch_submission_time_utc": batch_submission_time, "jobs": jobs_to_save}
+
 with open(jobs_file, "w") as f:
-    json.dump(jobs_to_save, f, indent=2)
+    json.dump(batch_data, f, indent=2)
 
 print(f"Job information saved to {jobs_file}")
 
@@ -153,9 +176,8 @@ for job_key, job_info in jobs.items():
     status = job_info["status"]
     status_counts[status] = status_counts.get(status, 0) + 1
 
-    print(
-        f"{job_key:30} | {job_info['parameter_name']:15} = {job_info['parameter_value']:10} | {status}"
-    )
+    settings_str = str(job_info.get("run_settings", {}))
+    print(f"{job_key:50} | {settings_str:40} | {status}")
 
 print("\n" + "-" * 80)
 print("Status Summary:")
