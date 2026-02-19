@@ -19,19 +19,12 @@ from rich.progress import (
 from rich.prompt import Confirm
 from rich.table import Table
 
+from utils import get_codeocean_client
+
 # Hard-coded root directory for downloads
 DOWNLOAD_ROOT = Path(r"C:\data\codeocean_downloads")
 DEFAULT_MAX_FILE_SIZE_MB = 50
 DEFAULT_FORCE_DOWNLOAD = False
-
-
-def get_codeocean_client() -> CodeOcean:
-    """Initialize Code Ocean client with API key from secrets."""
-    co_api_key = Path("../secrets/codeocean").read_text().strip()
-    co_client = CodeOcean(
-        domain="https://codeocean.allenneuraldynamics.org", token=co_api_key
-    )
-    return co_client
 
 
 def load_jobs_from_json(jobs_file: Path) -> dict[str, str]:

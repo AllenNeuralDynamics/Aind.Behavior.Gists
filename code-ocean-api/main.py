@@ -3,17 +3,13 @@ import time
 from datetime import datetime, timezone
 from itertools import product
 from pathlib import Path
-from tempfile import NamedTemporaryFile
 from typing import Any, Dict
 
-from codeocean import CodeOcean
 from codeocean.computation import NamedRunParam, RunParams
 
-co_api_key = Path("../secrets/codeocean").read_text()
-co_client = CodeOcean(
-    domain="https://codeocean.allenneuraldynamics.org", token=co_api_key
-)
-del co_api_key
+from utils import get_codeocean_client
+
+co_client = get_codeocean_client()
 capsule_id = "2a66df60-f96d-401e-8384-2e4aedeee818"
 respt = co_client.capsules.get_capsule(capsule_id)
 print(respt)
