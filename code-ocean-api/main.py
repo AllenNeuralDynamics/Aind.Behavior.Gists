@@ -1,6 +1,7 @@
 import json
 import time
 from datetime import datetime, timezone
+from itertools import product
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any, Dict
@@ -17,32 +18,17 @@ capsule_id = "2a66df60-f96d-401e-8384-2e4aedeee818"
 respt = co_client.capsules.get_capsule(capsule_id)
 print(respt)
 
+learning_rates = [1e-4, 5e-4, 1e-3]
+embedding_network = ["None", "cnn", "fully_connected", "feat_eng_37"]
+batch_sizes = [128]
 
 parameters_to_vary = [
     {
-        "learning_rate": 5e-5,
-        "batch_size": 256,
-    },
-    {
-        "learning_rate": 1e-4,
-        "batch_size": 256,
-    },
-    {
-        "learning_rate": 5e-5,
-        "batch_size": 128,
-    },
-    {
-        "learning_rate": 1e-4,
-        "batch_size": 128,
-    },
-    {
-        "learning_rate": 5e-4,
-        "batch_size": 256,
-    },
-    {
-        "learning_rate": 5e-4,
-        "batch_size": 128,
-    },
+        "learning_rate": lr,
+        "embedding_network": embed,
+        "batch_size": bs,
+    }
+    for lr, embed, bs in product(learning_rates, embedding_network, batch_sizes)
 ]
 
 jobs: Dict[str, Dict[str, Any]] = {}
@@ -62,7 +48,7 @@ for run_idx, run_settings in enumerate(parameters_to_vary):
         for param_name, param_value in run_settings.items()
     ]
     named_params.append(
-        NamedRunParam(param_name="base_output_dir", value=f"/results/npe/{job_key}")
+        NamedRunParam(param_name="base_output_dir", value=f"/results/{job_key}")
     )
 
     run_params = RunParams(
@@ -122,7 +108,7 @@ print("MONITORING JOB STATUS")
 print("=" * 80)
 
 terminal_states = ["completed", "failed", "stopped"]
-poll_interval = 10
+poll_interval = 30
 
 while True:
     all_done = True
