@@ -18,8 +18,10 @@ capsule_id = "2a66df60-f96d-401e-8384-2e4aedeee818"
 respt = co_client.capsules.get_capsule(capsule_id)
 print(respt)
 
-learning_rates = [1e-4, 5e-4, 1e-3]
-embedding_network = ["None", "cnn", "fully_connected", "feat_eng_37"]
+learning_rates = [5e-4, 1e-3]
+embedding_network = ["null", "cnn", "fully_connected", "feat_eng_37"]
+embedding_network = ["feat_eng_37"]
+
 batch_sizes = [128]
 
 parameters_to_vary = [
@@ -84,7 +86,7 @@ for run_idx, run_settings in enumerate(parameters_to_vary):
 print(f"\nTotal jobs submitted: {len(jobs)}")
 print(f"Job keys: {list(jobs.keys())}")
 
-jobs_file = Path("jobs.json")
+jobs_file = Path("jobs_null.json")
 print(f"\nSaving job information to {jobs_file}...")
 
 jobs_to_save = {}

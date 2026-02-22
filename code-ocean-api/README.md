@@ -38,9 +38,10 @@ uv run get_url.py --jobs-file jobs.json
 Options:
 - `--max-size-mb N` - Skip files larger than N MB (default: 50)
 - `--force` - Re-download files that already exist
+- `--no-auto-download` - Prompt for confirmation before downloading (by default, downloads automatically)
 - `--max-size-mb 0` - No size limit
 
-The script automatically skips jobs that are still running or don't have results yet.
+The script automatically skips jobs that are still running or don't have results yet. Downloads proceed automatically without confirmation by default - use `--no-auto-download` to enable prompts.
 
 Files are downloaded to `C:\data\codeocean_downloads\<job_id>\` with the original folder structure preserved.
 

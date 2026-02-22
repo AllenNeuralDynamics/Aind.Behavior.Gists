@@ -21,8 +21,9 @@ from rich.table import Table
 
 # Hard-coded root directory for downloads
 DOWNLOAD_ROOT = Path(r"C:\data\codeocean_downloads")
-DEFAULT_MAX_FILE_SIZE_MB = 50
+DEFAULT_MAX_FILE_SIZE_MB = 500
 DEFAULT_FORCE_DOWNLOAD = False
+DEFAULT_AUTO_DOWNLOAD = True
 
 
 def get_codeocean_client() -> CodeOcean:
@@ -141,6 +142,7 @@ def download_job(
     job_id: str,
     max_file_size_mb: float | None = DEFAULT_MAX_FILE_SIZE_MB,
     force_download: bool = DEFAULT_FORCE_DOWNLOAD,
+    auto_download: bool = DEFAULT_AUTO_DOWNLOAD,
 ) -> bool:
     """
     Download all files for a given Code Ocean job_id, preserving folder structure.
@@ -150,6 +152,7 @@ def download_job(
         job_id: The Code Ocean computation ID to download results from
         max_file_size_mb: Maximum file size in MB to download (None for no limit)
         force_download: If True, download files even if they already exist locally
+        auto_download: If True, skip confirmation prompt (default: True)
 
     Returns:
         True if download was successful, False otherwise
@@ -309,9 +312,12 @@ def download_job(
         f"Proceed?"
     )
 
-    if not Confirm.ask(message, default=False):
-        logging.info("Download cancelled by user.")
-        return False
+    if not auto_download:
+        if not Confirm.ask(message, default=False):
+            logging.info("Download cancelled by user.")
+            return False
+    else:
+        console.print("\n[green]Auto-download enabled, proceeding...[/green]")
 
     # Download files with progress tracking
     console.print("\n[bold green]Downloading files...[/bold green]")
@@ -377,6 +383,7 @@ def main(
     jobs_file: Path | None = None,
     max_file_size_mb: float | None = DEFAULT_MAX_FILE_SIZE_MB,
     force_download: bool = DEFAULT_FORCE_DOWNLOAD,
+    auto_download: bool = DEFAULT_AUTO_DOWNLOAD,
 ) -> None:
     """
     Download files from Code Ocean computations.
@@ -386,6 +393,7 @@ def main(
         jobs_file: Path to jobs.json file containing multiple jobs (mutually exclusive with job_id)
         max_file_size_mb: Maximum file size in MB to download (None for no limit)
         force_download: If True, download files even if they already exist locally
+        auto_download: If True, skip confirmation prompt (default: True)
     """
     logging.info("Initializing Code Ocean client...")
     co_client = get_codeocean_client()
@@ -469,7 +477,11 @@ def main(
             console.print(f"[bold cyan]{'=' * 80}[/bold cyan]\n")
 
             success = download_job(
-                co_client, computation_id, max_file_size_mb, force_download
+                co_client,
+                computation_id,
+                max_file_size_mb,
+                force_download,
+                auto_download,
             )
 
             if success:
@@ -483,7 +495,7 @@ def main(
 
     elif job_id is not None:
         # Single job mode
-        download_job(co_client, job_id, max_file_size_mb, force_download)
+        download_job(co_client, job_id, max_file_size_mb, force_download, auto_download)
     else:
         logging.error("Must provide either --job-id or --jobs-file")
         return
@@ -522,9 +534,15 @@ if __name__ == "__main__":
         action="store_true",
         help="Force download even if files already exist locally",
     )
+    parser.add_argument(
+        "--no-auto-download",
+        action="store_true",
+        help="Disable auto-download and prompt for confirmation",
+    )
 
     args = parser.parse_args()
 
     max_size: float | None = None if args.max_size_mb <= 0 else args.max_size_mb
+    auto_download: bool = not args.no_auto_download
 
-    main(args.job_id, args.jobs_file, max_size, args.force)
+    main(args.job_id, args.jobs_file, max_size, args.force, auto_download)
