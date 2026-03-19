@@ -14,19 +14,23 @@ capsule_id = "2a66df60-f96d-401e-8384-2e4aedeee818"
 respt = co_client.capsules.get_capsule(capsule_id)
 print(respt)
 
-learning_rates = [5e-4, 1e-3]
-embedding_network = ["null", "cnn", "fully_connected", "feat_eng_37"]
-embedding_network = ["feat_eng_37"]
 
-batch_sizes = [128]
+learning_rates = [5e-4, 1e-3]
+embedding_network = ["identity", "lru"]
+window_size_min = [100]
+window_size_max = [100]
 
 parameters_to_vary = [
     {
         "learning_rate": lr,
         "embedding_network": embed,
-        "batch_size": bs,
+        "apply_feature_engineering": not embed == "lru",
+        "window_size_min": w_min,
+        "window_size_max": w_max,
     }
-    for lr, embed, bs in product(learning_rates, embedding_network, batch_sizes)
+    for lr, embed, w_min, w_max in product(
+        learning_rates, embedding_network, window_size_min, window_size_max
+    )
 ]
 
 jobs: Dict[str, Dict[str, Any]] = {}
