@@ -22,7 +22,8 @@ from rich.table import Table
 from utils import get_codeocean_client
 
 # Hard-coded root directory for downloads
-DOWNLOAD_ROOT = Path(r"C:\data\codeocean_downloads")
+# Use extended-length path prefix to avoid Windows MAX_PATH (260 char) limit
+DOWNLOAD_ROOT = Path(r"\\?\C:\data\codeocean_downloads")
 DEFAULT_MAX_FILE_SIZE_MB = 500
 DEFAULT_FORCE_DOWNLOAD = False
 DEFAULT_AUTO_DOWNLOAD = True

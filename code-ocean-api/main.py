@@ -15,22 +15,25 @@ respt = co_client.capsules.get_capsule(capsule_id)
 print(respt)
 
 
-learning_rates = [5e-4, 1e-3]
+learning_rates = [5e-4]
 embedding_network = ["identity", "lru"]
-window_size_min = [100]
-window_size_max = [100]
+win = [(100, 100)]
+offset = [
+    '{"type": "inferred", "prior_low": -1.0, "prior_high": 1.0}',
+    '{"type": "fixed", "value": 0.0}',
+]
 
 parameters_to_vary = [
     {
         "learning_rate": lr,
         "embedding_network": embed,
         "apply_feature_engineering": not embed == "lru",
-        "window_size_min": w_min,
-        "window_size_max": w_max,
+        "window_size_min": win[0],
+        "window_size_max": win[1],
+        "n_simulations": 2_000_000 if embed == "lru" else 4_000_000,
+        "offset": o,
     }
-    for lr, embed, w_min, w_max in product(
-        learning_rates, embedding_network, window_size_min, window_size_max
-    )
+    for lr, embed, win, o in product(learning_rates, embedding_network, win, offset)
 ]
 
 jobs: Dict[str, Dict[str, Any]] = {}
@@ -49,9 +52,7 @@ for run_idx, run_settings in enumerate(parameters_to_vary):
         NamedRunParam(param_name=param_name, value=str(param_value))
         for param_name, param_value in run_settings.items()
     ]
-    named_params.append(
-        NamedRunParam(param_name="base_output_dir", value=f"/results/{job_key}")
-    )
+    named_params.append(NamedRunParam(param_name="base_output_dir", value="results"))
 
     run_params = RunParams(
         capsule_id=capsule_id,
