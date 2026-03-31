@@ -52,7 +52,7 @@ for run_idx, run_settings in enumerate(parameters_to_vary):
         NamedRunParam(param_name=param_name, value=str(param_value))
         for param_name, param_value in run_settings.items()
     ]
-    named_params.append(NamedRunParam(param_name="base_output_dir", value="results"))
+    named_params.append(NamedRunParam(param_name="base_output_dir", value="/results"))
 
     run_params = RunParams(
         capsule_id=capsule_id,
