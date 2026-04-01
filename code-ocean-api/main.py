@@ -37,7 +37,9 @@ parameters_to_vary = [
 ]
 
 jobs: Dict[str, Dict[str, Any]] = {}
-batch_submission_time = datetime.now(timezone.utc).isoformat()
+batch_submission_time = datetime.now(timezone.utc)
+batch_submission_time_str = batch_submission_time.isoformat()
+batch_submission_time_filename = batch_submission_time.strftime("%Y%m%d_%H%M%S")
 
 print("=" * 80)
 print("SUBMITTING JOBS")
@@ -87,7 +89,7 @@ for run_idx, run_settings in enumerate(parameters_to_vary):
 print(f"\nTotal jobs submitted: {len(jobs)}")
 print(f"Job keys: {list(jobs.keys())}")
 
-jobs_file = Path("jobs_null.json")
+jobs_file = Path(f"jobs_null_{batch_submission_time_filename}.json")
 print(f"\nSaving job information to {jobs_file}...")
 
 jobs_to_save = {}
@@ -99,7 +101,10 @@ for job_key, job_info in jobs.items():
         job_data["response"] = str(job_data["response"])
     jobs_to_save[job_key] = job_data
 
-batch_data = {"batch_submission_time_utc": batch_submission_time, "jobs": jobs_to_save}
+batch_data = {
+    "batch_submission_time_utc": batch_submission_time_str,
+    "jobs": jobs_to_save,
+}
 
 with open(jobs_file, "w") as f:
     json.dump(batch_data, f, indent=2)
