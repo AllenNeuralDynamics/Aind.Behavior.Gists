@@ -1,0 +1,15 @@
+[project]
+name = "aind-behavior-vr-foraging-manual-curriculum"
+version = "0.1.0"
+description = "Manually inject a VR Foraging curriculum suggestion into Dataverse (posthoc override)."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aind-behavior-vr-foraging>=1.2",
+    "aind-behavior-vr-foraging-curricula",
+    "aind-clabe[aind-services]>=0.10.6",
+    "rich>=14.0",
+]
+
+[tool.uv.sources]
+aind-behavior-vr-foraging-curricula = { git = "https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.git", subdirectory = "src/packages/aind_behavior_vr_foraging_curricula" }
