@@ -1,0 +1,26 @@
+[project]
+name = "vr-foraging-packaging-watcher"
+version = "0.1.0"
+description = "Watches a network folder for new VR-foraging sessions, packages them and syncs the export to S3."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pydantic-settings>=2.10.1",
+    "pydantic>=2.10",
+]
+
+[project.optional-dependencies]
+packaging-cli = ["aind-behavior-vr-foraging-packaging==0.0.16"]
+
+[dependency-groups]
+dev = ["ruff"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.lint]
+extend-select = ["Q", "RUF100", "I"]
+
+[tool.setuptools]
+packages = ["watcher"]

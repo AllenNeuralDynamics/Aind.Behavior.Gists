@@ -1,0 +1,70 @@
+services:
+  packaging-watcher:
+    build:
+      context: .
+    image: vr-foraging-packaging-watcher:local
+    container_name: vr-foraging-packaging-watcher
+    restart: unless-stopped
+    environment:
+      RUN_MODE: cron
+      CRON_SCHEDULE: "*/10 * * * *"
+      RUN_AT_STARTUP: "true"
+
+      # Empty means every subject -- keep this set.
+      VRFW_SUBJECTS: "789917,754573,760332"
+      # "today" is resolved once at container start, so a long-running container
+      # keeps the floor it started with rather than re-evaluating it daily.
+      VRFW_MIN_SESSION_DATE: today
+      VRFW_SESSION_REGEX: '^(?P<subject>\d+)_(?P<date>\d{4}-\d{2}-\d{2})T\d{6}Z$'
+      VRFW_SESSION_GLOB: "*"
+      VRFW_REQUIRE_FILES: "[]"
+
+      # `bucket@region` (the AIND convention) also works here.
+      VRFW_S3_BUCKET: aind-scratch-data
+      VRFW_S3_PREFIX: vr-foraging/replenishment-temp-sharing
+      VRFW_AWS_REGION: us-west-2
+      VRFW_CHECK_REMOTE_BEFORE_UPLOAD: "true"
+      #AWS_PROFILE: default
+
+      VRFW_SETTLE_SECONDS: "300"
+      VRFW_POLL_INTERVAL_SECONDS: "60"  # only used when RUN_MODE=poll
+      VRFW_MAX_ATTEMPTS: "3"
+      VRFW_RETRY_BACKOFF_SECONDS: "900"
+
+      VRFW_PACKAGING_SUBCOMMAND: session
+      VRFW_PACKAGING_EXTRA_ARGS: "[]"  # e.g. '["--write-nwb"]'
+      VRFW_PACKAGING_TIMEOUT_SECONDS: "3600"
+      VRFW_UPLOAD_TIMEOUT_SECONDS: "7200"
+
+      # false: only sessions appearing after this container's first start are
+      # ever uploaded (existing ones are marked pre_existing and skipped).
+      VRFW_PROCESS_EXISTING: "true"
+      VRFW_DRY_RUN: "false"
+      VRFW_LOG_LEVEL: INFO
+    volumes:
+      # HOST_RAW_DIR / HOST_AWS_DIR come from .env (never committed).
+      - "${HOST_RAW_DIR}:/data/raw:ro"
+      - "${HOST_AWS_DIR}:/root/.aws:ro"
+      - state:/data/state
+      - scratch:/data/scratch
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+volumes:
+  state:
+  scratch:
+
+# Alternative to HOST_RAW_DIR: let Docker mount the SMB share itself (needed on
+# Docker Desktop for Windows, where a UNC path can't be bind-mounted). Replace
+# the `${HOST_RAW_DIR}:/data/raw:ro` line above with `raw:/data/raw:ro` and
+# uncomment (SMB_USER/SMB_PASSWORD/SMB_DOMAIN go in .env):
+#
+#   raw:
+#     driver: local
+#     driver_opts:
+#       type: cifs
+#       device: "//allen/aind/stage/vr-foraging/data"
+#       o: "username=${SMB_USER},password=${SMB_PASSWORD},domain=${SMB_DOMAIN},vers=3.0,ro,uid=0,gid=0,nobrl"

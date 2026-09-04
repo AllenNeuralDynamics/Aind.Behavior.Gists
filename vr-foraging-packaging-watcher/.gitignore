@@ -1,0 +1,27 @@
+# --- Secrets / local overrides ---
+.env
+
+# --- Runtime state, only ever meant to exist on a host or in a container ---
+example/state/
+example/scratch/
+state/
+scratch/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+
+# --- uv / venvs ---
+# (.venv self-ignores via its own nested .gitignore, but be explicit in case a
+# differently-named or differently-tooled venv ever shows up here)
+.venv/
+venv/
+
+# --- OS cruft ---
+.DS_Store
+Thumbs.db
