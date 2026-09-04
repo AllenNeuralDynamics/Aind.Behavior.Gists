@@ -15,8 +15,9 @@ services:
       # "today" is resolved once at container start, so a long-running container
       # keeps the floor it started with rather than re-evaluating it daily.
       VRFW_MIN_SESSION_DATE: today
-      VRFW_SESSION_REGEX: '^(?P<subject>\d+)_(?P<date>\d{4}-\d{2}-\d{2})T\d{6}Z$'
-      VRFW_SESSION_GLOB: "*"
+      # Sessions sit one level under a per-subject folder on the real share
+      # (e.g. 789917/789917_2025-10-23T200307Z/), not directly under input_dir.
+      VRFW_SESSION_GLOB: "*/*"
       VRFW_REQUIRE_FILES: "[]"
 
       # `bucket@region` (the AIND convention) also works here.
