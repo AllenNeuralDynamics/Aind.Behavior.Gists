@@ -10,8 +10,8 @@ services:
       CRON_SCHEDULE: "*/10 * * * *"
       RUN_AT_STARTUP: "true"
 
-      # Empty means every subject -- keep this set.
-      VRFW_SUBJECTS: "789917,754573,760332"
+      # Empty means every subject -- keep this set. use "animal1, animal2" for multiple subjects.
+      VRFW_SUBJECTS: "test_111111"
       # "today" is resolved once at container start, so a long-running container
       # keeps the floor it started with rather than re-evaluating it daily.
       VRFW_MIN_SESSION_DATE: today
@@ -43,8 +43,8 @@ services:
       VRFW_DRY_RUN: "false"
       VRFW_LOG_LEVEL: INFO
     volumes:
-      # HOST_RAW_DIR / HOST_AWS_DIR come from .env (never committed).
-      - "${HOST_RAW_DIR}:/data/raw:ro"
+      # HOST_AWS_DIR and the SMB creds below come from .env (never committed).
+      - raw:/data/raw:ro
       - "${HOST_AWS_DIR}:/root/.aws:ro"
       - state:/data/state
       - scratch:/data/scratch
@@ -57,15 +57,13 @@ services:
 volumes:
   state:
   scratch:
-
-# Alternative to HOST_RAW_DIR: let Docker mount the SMB share itself (needed on
-# Docker Desktop for Windows, where a UNC path can't be bind-mounted). Replace
-# the `${HOST_RAW_DIR}:/data/raw:ro` line above with `raw:/data/raw:ro` and
-# uncomment (SMB_USER/SMB_PASSWORD/SMB_DOMAIN go in .env):
-#
-#   raw:
-#     driver: local
-#     driver_opts:
-#       type: cifs
-#       device: "//allen/aind/stage/vr-foraging/data"
-#       o: "username=${SMB_USER},password=${SMB_PASSWORD},domain=${SMB_DOMAIN},vers=3.0,ro,uid=0,gid=0,nobrl"
+  # Docker mounts the share itself -- needed on Docker Desktop for Windows,
+  # where a UNC path can't be bind-mounted directly. On a Linux host with the
+  # share already in /etc/fstab, replace this with a plain bind mount instead:
+  # `${HOST_RAW_DIR}:/data/raw:ro` (HOST_RAW_DIR in .env).
+  raw:
+    driver: local
+    driver_opts:
+      type: cifs
+      device: "//allen/aind/stage/vr-foraging/data"
+      o: "username=${SMB_USER},password=${SMB_PASSWORD},domain=${SMB_DOMAIN},vers=3.0,ro,uid=0,gid=0,nobrl"
