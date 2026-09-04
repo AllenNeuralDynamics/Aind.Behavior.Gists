@@ -14,10 +14,7 @@ from pathlib import Path
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Default session folder name, e.g. "789917_2025-12-02T205233Z". The `subject` and
-# `date` capture groups are what the subject/date filters read; a custom regex that
-# omits them falls back to splitting the name on "_" and to the folder's mtime.
-DEFAULT_SESSION_REGEX = r"^(?P<subject>\d+)_(?P<date>\d{4}-\d{2}-\d{2})T\d{6}Z$"
+DEFAULT_SESSION_REGEX = r"^(?P<subject>.+)_(?P<date>\d{4}-\d{2}-\d{2})T\d{6}Z$"
 
 
 class Config(BaseSettings):

@@ -109,6 +109,12 @@ def remote_session_exists(config: Config, session_dir: Path) -> bool:
         logger.warning("Could not check %s for existing data: %s. Proceeding as if it is empty.", destination, exc)
         return False
 
+    # `aws s3 ls` exits 1 (not 0-with-empty-output) when a prefix matches nothing
+    # -- that is the normal, common "not yet uploaded" case, not a failure.
+    if result.returncode == 1 and not result.stdout.strip() and not result.stderr.strip():
+        logger.debug("Nothing at %s yet.", destination)
+        return False
+
     if result.returncode != 0:
         logger.warning(
             "aws s3 ls exited %d checking %s: %s. Proceeding as if it is empty.",
