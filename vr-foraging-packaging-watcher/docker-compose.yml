@@ -25,7 +25,7 @@ services:
       VRFW_S3_PREFIX: vr-foraging/replenishment-temp-sharing
       VRFW_AWS_REGION: us-west-2
       VRFW_CHECK_REMOTE_BEFORE_UPLOAD: "true"
-      #AWS_PROFILE: default
+      AWS_PROFILE: "${AWS_PROFILE}"
 
       VRFW_SETTLE_SECONDS: "300"
       VRFW_POLL_INTERVAL_SECONDS: "60"  # only used when RUN_MODE=poll
