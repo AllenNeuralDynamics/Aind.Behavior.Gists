@@ -27,6 +27,21 @@ RUN set -eux; \
     rm -rf /tmp/aws /tmp/awscliv2.zip; \
     aws --version
 
+# --- IAM Roles Anywhere signing helper -------------------------------------------
+# The host profile (IAmAnywhere) uses aws_signing_helper.exe (Windows).  We ship
+# the Linux equivalent here; the entrypoint rewrites the mounted config at startup
+# to point at this binary instead of the Windows exe.
+ARG SIGNING_HELPER_VERSION=1.4.0
+RUN set -eux; \
+    case "$(dpkg --print-architecture)" in \
+      amd64) arch=X86_64 ;; \
+      arm64) arch=aarch64 ;; \
+      *) echo "unsupported architecture" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSL "https://rolesanywhere.amazonaws.com/releases/${SIGNING_HELPER_VERSION}/${arch}/Linux/aws_signing_helper" \
+        -o /usr/local/bin/aws_signing_helper; \
+    chmod +x /usr/local/bin/aws_signing_helper
+
 # --- supercronic: cron for containers (logs to stdout, no PID-1 quirks) -------
 ARG SUPERCRONIC_VERSION=v0.2.33
 RUN set -eux; \
