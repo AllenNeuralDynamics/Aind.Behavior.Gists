@@ -11,7 +11,8 @@ services:
       RUN_AT_STARTUP: "true"
 
       # Empty means every subject -- use "animal1, animal2" for multiple subjects.
-      VRFW_SUBJECTS: ""
+      # Comes from .env so it can be overridden per-deployment without editing this file.
+      VRFW_SUBJECTS: "${VRFW_SUBJECTS}"
       # "today" is resolved once at container start; a long-running container
       # keeps the floor it started with rather than re-evaluating it daily.
       VRFW_MIN_SESSION_DATE: today

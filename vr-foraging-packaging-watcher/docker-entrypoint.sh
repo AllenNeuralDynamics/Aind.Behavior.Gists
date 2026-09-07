@@ -8,15 +8,19 @@
 #   <anything>     - exec'd verbatim, so `docker compose run ... --status` works.
 set -euo pipefail
 
-# ── IAM Roles Anywhere: patch Windows paths in the host-mounted .aws/config ──
-# The host config references aws_signing_helper.exe (Windows binary) and Windows-
-# style absolute paths (C:\Users\...\  or  C:/Users/.../). Rewrite them so that
-# the IAmAnywhere profile works with the Linux binary shipped in this image and
-# the files available under /root/.aws (the read-only bind-mount from the host).
+# ── IAM Roles Anywhere: patch host paths in the host-mounted .aws/config ──
+# The host config references aws_signing_helper(.exe) and absolute paths into the
+# host's .aws directory -- either Windows-style (C:\Users\...\.aws\) or a native
+# Linux path (e.g. /home/user/.aws/, which is what a Linux host's own `aws configure`
+# writes). Rewrite both forms so the IAmAnywhere profile works with the Linux binary
+# shipped in this image and the files available under /root/.aws (the read-only
+# bind-mount from the host, whatever the host-side directory happens to be called).
 if [ -f /root/.aws/config ]; then
     sed \
         -e 's|[A-Za-z]:[/\\][Uu]sers[/\\][^/\\]*[/\\]\.aws[/\\]aws_signing_helper\.exe|/usr/local/bin/aws_signing_helper|g' \
         -e 's|[A-Za-z]:[/\\][Uu]sers[/\\][^/\\]*[/\\]\.aws[/\\]\?|/root/.aws/|g' \
+        -e 's|/[^[:space:]]*/\.aws/aws_signing_helper|/usr/local/bin/aws_signing_helper|g' \
+        -e 's|/[^[:space:]]*/\.aws/|/root/.aws/|g' \
         /root/.aws/config > /tmp/aws-config-linux
     export AWS_CONFIG_FILE=/tmp/aws-config-linux
     echo "[entrypoint] ~/.aws/config patched for Linux (Windows paths → /root/.aws/, signing helper → Linux binary)"
