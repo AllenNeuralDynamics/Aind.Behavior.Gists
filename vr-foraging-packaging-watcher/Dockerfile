@@ -75,7 +75,16 @@ ENV VRFW_INPUT_DIR=/data/raw \
     VRFW_STATE_DIR=/data/state \
     VRFW_SCRATCH_DIR=/data/scratch \
     RUN_MODE=cron \
-    CRON_SCHEDULE="*/10 * * * *"
+    CRON_SCHEDULE="*/10 * * * *" \
+    HOME=/config
+# Some NFS exports only grant access to specific AD principals (no EVERYONE@ ACE),
+# so the container may need to run as an arbitrary host UID (via `user:` in
+# docker-compose.yml) rather than root for /data/raw to be readable at all. Make
+# every directory that UID needs to write world-writable/traversable so this works
+# regardless of which UID that ends up being; /root itself stays root-only, so
+# credentials live under $HOME instead, which any UID can reach.
+RUN mkdir -p "$HOME/.aws" /data/state /data/scratch \
+ && chmod -R a+rwX "$HOME" /data/state /data/scratch /app
 VOLUME ["/data/state", "/data/scratch"]
 
 # Liveness = "a scan finished recently" (the watcher writes a heartbeat file).

@@ -5,6 +5,12 @@ services:
     image: vr-foraging-packaging-watcher:local
     container_name: vr-foraging-packaging-watcher
     restart: unless-stopped
+    # Some session folders on the NFS share only grant access to specific AD
+    # principals (no EVERYONE@ ACE) -- root has no AD identity, so it gets denied.
+    # Run as the host user whose UID the export actually recognizes (from .env).
+    # Defaults to root (the old behaviour) if HOST_UID/HOST_GID aren't set --
+    # only needed once you actually hit that ACL gap.
+    user: "${HOST_UID:-0}:${HOST_GID:-0}"
     environment:
       RUN_MODE: cron
       CRON_SCHEDULE: "*/10 * * * *"
@@ -45,7 +51,9 @@ services:
     volumes:
       # HOST_RAW_DIR and HOST_AWS_DIR come from .env (never committed).
       - "${HOST_RAW_DIR}:/data/raw:ro"
-      - "${HOST_AWS_DIR}:/root/.aws:ro"
+      # /config is $HOME in the image (not /root: that's root-only, unreadable by
+      # the non-root user: above).
+      - "${HOST_AWS_DIR}:/config/.aws:ro"
       - state:/data/state
       - scratch:/data/scratch
     logging:
