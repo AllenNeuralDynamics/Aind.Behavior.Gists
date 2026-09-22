@@ -21,7 +21,9 @@ services:
       VRFW_SUBJECTS: "${VRFW_SUBJECTS}"
       # "today" is resolved once at container start; a long-running container
       # keeps the floor it started with rather than re-evaluating it daily.
-      VRFW_MIN_SESSION_DATE: today
+      # Other options: an ISO date (e.g. "2026-09-04") or "" for no lower bound.
+      # Defaults to "today" if unset in .env.
+      VRFW_MIN_SESSION_DATE: "${VRFW_MIN_SESSION_DATE:-today}"
       # Sessions live one level under a per-subject folder: <subject>/<session>.
       VRFW_SESSION_GLOB: "*/*"
       VRFW_REQUIRE_FILES: "[]"
