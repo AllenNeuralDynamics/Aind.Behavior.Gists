@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-packaging-cli = ["aind-behavior-vr-foraging-packaging==0.0.16"]
+packaging-cli = ["aind-behavior-vr-foraging-packaging==0.21.0"]
 
 [dependency-groups]
 dev = ["ruff"]

@@ -42,15 +42,15 @@ wheels = [
 
 [[package]]
 name = "aind-behavior-vr-foraging"
-version = "1.2.3"
+version = "1.2.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aind-behavior-services" },
     { name = "pydantic-settings" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9d/5e/99aa320d5b0a34f6ec0ddf83c40cc36c9d0f7d58d5c113bef170f50f1e01/aind_behavior_vr_foraging-1.2.3.tar.gz", hash = "sha256:65c3fd45cd85c96a35297d15bf0fd29680a45f37fb52aff69a3f137c68611c72", size = 37428, upload-time = "2026-08-28T02:59:19.754Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/93/26/5178912baa663e47f0b876860e71b149169079568f8377c929ae415d87a3/aind_behavior_vr_foraging-1.2.6.tar.gz", hash = "sha256:e8ea326b0921086a7c7869d0d3e6adf4529ae84fd6063c14104d894dcea52cc1", size = 37419, upload-time = "2026-09-11T23:29:09.82Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/39/a6/c42ed6a57686bbd815265addccbf8768e804cb65d13b3392f4b180f7ba6b/aind_behavior_vr_foraging-1.2.3-py3-none-any.whl", hash = "sha256:946ca5e723544588d69d8aa2f178604ac72c1f9777d0c4f61b023b737e65488d", size = 51659, upload-time = "2026-08-28T02:59:17.536Z" },
+    { url = "https://files.pythonhosted.org/packages/bf/64/9e9555286dbb7654ec9eceb809f1fafb8f23a41d28f967ed2ddf4874d82c/aind_behavior_vr_foraging-1.2.6-py3-none-any.whl", hash = "sha256:9f1552a6a54d99d6882031ef46e3b930e94882c42ed7460b444d890c08683b72", size = 51653, upload-time = "2026-09-11T23:29:07.886Z" },
 ]
 
 [package.optional-dependencies]
@@ -60,7 +60,7 @@ data = [
 
 [[package]]
 name = "aind-behavior-vr-foraging-packaging"
-version = "0.0.16"
+version = "0.21.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aind-behavior-curriculum" },
@@ -75,9 +75,9 @@ dependencies = [
     { name = "pynwb" },
     { name = "scipy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f5/9f/a402a40293f8c141bce46f809780a34882704da1ec4b19c133626139589c/aind_behavior_vr_foraging_packaging-0.0.16.tar.gz", hash = "sha256:14b28374beb28d357c23f19df4a1443e449fb6931c262df5d3bc41d14650a338", size = 313174, upload-time = "2026-09-01T19:48:13.852Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/05/c2/6b82489f4b0984b0f12664ab29cb7c7b0e3cf275f6bf32de3b715be221ae/aind_behavior_vr_foraging_packaging-0.21.0.tar.gz", hash = "sha256:73a80805860c79360554d7be0974a852acc0454fe445211967c8e05d6064e3e1", size = 339496, upload-time = "2026-09-17T23:57:24.635Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/36/42/8c558dcb3e53127ea299572475492bcaf0e7bad39093f9a6c74755bdcb5d/aind_behavior_vr_foraging_packaging-0.0.16-py3-none-any.whl", hash = "sha256:cbcbfd12c366296665db61646166d93bc934f7b51800e9cbb82a98ac489eff7e", size = 56126, upload-time = "2026-09-01T19:48:12.545Z" },
+    { url = "https://files.pythonhosted.org/packages/38/a9/66c39f0ed0e9ce5a307b020f2a5435887b00ace753d5e5bab62aa5e39e34/aind_behavior_vr_foraging_packaging-0.21.0-py3-none-any.whl", hash = "sha256:694f19dbbf660f585d24342869970229c611bb02ea5c926a5c77bb7f842f5812", size = 58125, upload-time = "2026-09-17T23:57:23.285Z" },
 ]
 
 [[package]]
@@ -1930,7 +1930,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aind-behavior-vr-foraging-packaging", marker = "extra == 'packaging-cli'", specifier = "==0.0.16" },
+    { name = "aind-behavior-vr-foraging-packaging", marker = "extra == 'packaging-cli'", specifier = "==0.21.0" },
     { name = "pydantic", specifier = ">=2.10" },
     { name = "pydantic-settings", specifier = ">=2.10.1" },
 ]
