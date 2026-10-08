@@ -31,14 +31,18 @@ def signal_quality(signal: pd.Series) -> dict[str, float]:
     }
 
 
-def filter_signal(signal: pd.Series, fs: float, notch_freq: float = 50.0) -> tuple[np.ndarray, np.ndarray]:
+def filter_signal(
+    signal: pd.Series, fs: float, notch_freq: float = 50.0
+) -> tuple[np.ndarray, np.ndarray]:
     """Resample to a uniform grid, then notch + 0.2 Hz high-pass + 15 Hz low-pass.
 
     Returns (t_uniform, filtered).
     """
     t = signal.index.values
     t_uniform = np.arange(t[0], t[-1], 1.0 / fs)
-    y = interp1d(t, signal.values, kind="linear", bounds_error=False, fill_value="extrapolate")(t_uniform)
+    y = interp1d(
+        t, signal.values, kind="linear", bounds_error=False, fill_value="extrapolate"
+    )(t_uniform)
 
     b, a = iirnotch(notch_freq, 30.0, fs)
     y = filtfilt(b, a, y)
