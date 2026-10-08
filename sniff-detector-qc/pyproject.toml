@@ -1,0 +1,15 @@
+[project]
+name = "sniff-detector-qc"
+version = "0.1.0"
+description = "Proof of concept: Harp sniff detector QC metrics, read straight from S3 with harpstore"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "harpstore[obstore] @ git+https://github.com/bruno-f-cruz/harpstore",
+    "numpy",
+    "pandas",
+    "scipy",
+]
+
+[dependency-groups]
+dev = ["ruff"]
